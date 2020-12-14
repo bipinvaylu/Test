@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <color name="primary">@android:color/holo_green_dark</color>
+    <color name="primary_variant">#E64DDC</color>
+    <color name="secondary">#FF03DAC5</color>
+    <color name="secondary_variant">#FF018786</color>
+    <color name="on_secondary">#FF0000CC</color>
+    <color name="on_primary">#FFFFFFFF</color>
+
+    <color name="mtrl_textinput_default_box_stroke_color" tools:override="true">
+        #CCDD00
+    </color>
+</resources>
