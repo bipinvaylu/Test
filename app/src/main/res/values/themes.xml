@@ -18,6 +18,6 @@
         <item name="android:windowBackground">@color/on_secondary</item>
         <item name="colorControlNormal">#77FFDD</item>
         <item name="android:colorControlNormal">#77FFDD</item>
-        <item name="boxStrokeColor">@color/text_input_box_stroke_color</item>
+<!--        <item name="boxStrokeColor">@color/text_input_box_stroke_color</item>-->
     </style>
 </resources>
