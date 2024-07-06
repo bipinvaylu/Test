@@ -1,34 +1,120 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'com.google.devtools.ksp'
 }
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.2"
+    final sdk = rootProject.ext.sdk
+
+    compileSdk sdk.compileSdk
 
     defaultConfig {
         applicationId "dev.bipin.test"
-        minSdkVersion 26
-        targetSdkVersion 30
+        minSdkVersion sdk.minSdk
+        targetSdkVersion sdk.targetSdk
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        signingConfig signingConfigs.debug
     }
 
-    buildTypes {
+    signingConfigs {
+        debug {
+            // Use default debug certificate provided in Android SDK
+        }
+
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            def keystorePropertiesFile = rootProject.file("release.properties")
+            if (keystorePropertiesFile.exists()) {
+                def keystoreProperties = new Properties()
+                keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
+                keyAlias keystoreProperties["keyAlias"]
+                keyPassword keystoreProperties["keyPassword"]
+                storeFile file(keystoreProperties["storeFile"])
+                storePassword keystoreProperties["storePassword"]
+            }
         }
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+
+
+    buildTypes {
+        debug {
+            debuggable true
+            minifyEnabled false
+            shrinkResources false
+            firebaseCrashlytics {
+                mappingFileUploadEnabled false
+            }
+        }
+
+        release {
+            debuggable false
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            firebaseCrashlytics {
+                mappingFileUploadEnabled true
+            }
+        }
     }
+
+    flavorDimensions += "env"
+
+    productFlavors {
+        local {
+            dimension "env"
+            buildConfigField("String", "API_BASE_URL", "\"http://192.168.1.222:3000/api/\"")
+            buildConfigField("String", "X_API_KEY", "\"YEFYhOur0UVjnNZsUo0LmjZOSXZNu0N0MoYgu\"")
+            buildConfigField("String", "JUNE_MOBILE_APP_WRITE_KEY", "\"yVpRfVFVeXdBu5Ve\"")
+            buildConfigField("String", "GOOGLE_MAPS_API_KEY", "\"AIzaSyB7eAY5FBqoybCgyriaRufVkcYEf-3T9nI\"")
+            buildConfigField("String", "AWS_S3_BUCKET_URL", "\"https://hammr-customer-files-staging.s3.us-west-1.amazonaws.com/\"")
+            buildConfigField("String", "AWS_S3_BUCKET_NAME", "\"hammr-customer-files-staging\"")
+
+        }
+
+        dev {
+            dimension "env"
+            buildConfigField("String", "API_BASE_URL", "\"https://punchout.hammr.com/api/\"")
+            buildConfigField("String", "X_API_KEY", "\"YEFYhOur0UVjnNZsUo0LmjZOSXZNu0N0MoYgu\"")
+            buildConfigField("String", "JUNE_MOBILE_APP_WRITE_KEY", "\"yVpRfVFVeXdBu5Ve\"")
+            buildConfigField("String", "GOOGLE_MAPS_API_KEY", "\"AIzaSyB7eAY5FBqoybCgyriaRufVkcYEf-3T9nI\"")
+            buildConfigField("String", "AWS_S3_BUCKET_URL", "\"https://hammr-customer-files-staging.s3.us-west-1.amazonaws.com/\"")
+            buildConfigField("String", "AWS_S3_BUCKET_NAME", "\"hammr-customer-files-staging\"")
+        }
+
+        prod {
+            dimension "env"
+            buildConfigField("String", "API_BASE_URL", "\"https://api.hammr.com/api/\"")
+            buildConfigField("String", "X_API_KEY", "\"YEFYhOur0UVjnNZsUo0LmjZOSXZNu0N0MoYgu\"")
+            buildConfigField("String", "JUNE_MOBILE_APP_WRITE_KEY", "\"RHpV4ukYarvpktEQ\"")
+            buildConfigField("String", "GOOGLE_MAPS_API_KEY", "\"AIzaSyB7eAY5FBqoybCgyriaRufVkcYEf-3T9nI\"")
+            buildConfigField("String", "AWS_S3_BUCKET_URL", "\"https://hammr-customer-files-production.s3.us-west-1.amazonaws.com/\"")
+            buildConfigField("String", "AWS_S3_BUCKET_NAME", "\"hammr-customer-files-production\"")
+        }
+    }
+
+    lint {
+        disable 'NullSafeMutableLiveData'
+        abortOnError true
+        checkReleaseBuilds true
+    }
+
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = "17"
+        freeCompilerArgs = ['-Xjvm-default=all-compatibility']
+    }
+
+    packagingOptions {
+        resources.excludes.add("META-INF/*")
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 }
 

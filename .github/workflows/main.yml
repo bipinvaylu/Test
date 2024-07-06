@@ -1,0 +1,51 @@
+name: Android Build
+
+on:
+  push:
+    branches: [github-actions]
+
+jobs:
+  build:
+    runs-on : macOS-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4.2.1
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+          cache: 'gradle'
+
+      - name: Grant execute permissions for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Decode Keystore
+        run: echo "${{ secrets.KEYSTORE }}" | base64 --decode > ./AppSigningKey.keystore
+
+      - name: Build Production Release App Bundle
+        run: ./gradlew bundleProdRelease -Pandroid.injected.signing.store.file=/Users/runner/work/android/android/AppSigningKey.keystore -Pandroid.injected.signing.store.password=${{ secrets.KEY_STORE_PASSWORD }} -Pandroid.injected.signing.key.alias=${{ secrets.ALIAS }} -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
+
+#      - name: Upload Production Release App Bundle
+#        uses: actions/upload-artifact@v4.3.3
+#        with:
+#          name: Release-Artifact
+#          path: /Users/runner/work/android/android/app/build/outputs/bundle/prodRelease/app-prod-release.aab
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          tag_name: ${{ github.ref }}
+          generate_release_notes: true
+          prerelease: true
+          draft: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            /Users/runner/work/android/android/app/build/outputs/bundle/prodRelease/app-prod-release.aab
+            
+
+
+
